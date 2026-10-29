@@ -1,24 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import room from "@/assets/room.jpg";
+import cat from "@/assets/cat.png";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Bookscape — your living library" },
+      { name: "description", content: "A cozy, interactive shelf for books, essays, newsletters and research you love." },
+      { property: "og:title", content: "Bookscape — your living library" },
+      { property: "og:description", content: "A cozy, interactive shelf for books, essays, newsletters and research you love." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-6">
+      <img src={room} alt="Cozy reading corner with plants and fairy lights" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1088} />
+      <div className="glass relative max-w-xl rounded-3xl p-10 text-center shadow-2xl">
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Welcome to</p>
+        <h1 className="mt-2 text-6xl font-semibold">Bookscape</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
+          A shelf that remembers what you read. Books get dog-eared, saved articles pile up on the floor,
+          and the lighting follows your day.
+        </p>
+        <div className="mt-8 flex justify-center gap-3">
+          <Button size="lg" asChild><Link to="/library">Enter my library</Link></Button>
+          <Button size="lg" variant="outline" asChild><Link to="/auth">Sign in</Link></Button>
+        </div>
+      </div>
+      <img src={cat} alt="A sleeping cat" className="absolute bottom-6 right-10 w-40" width={992} height={672} />
+    </main>
   );
 }
