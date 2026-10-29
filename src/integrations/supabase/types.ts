@@ -14,7 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      items: {
+        Row: {
+          author: string | null
+          color: string
+          created_at: string
+          description: string | null
+          genre: string
+          id: string
+          kind: string
+          last_opened_at: string | null
+          open_count: number
+          reading_minutes: number
+          status: string
+          title: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          author?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          genre?: string
+          id?: string
+          kind?: string
+          last_opened_at?: string | null
+          open_count?: number
+          reading_minutes?: number
+          status?: string
+          title: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          author?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          genre?: string
+          id?: string
+          kind?: string
+          last_opened_at?: string | null
+          open_count?: number
+          reading_minutes?: number
+          status?: string
+          title?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          item_id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          item_id: string
+          kind?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          item_id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          library_name: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          library_name?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          library_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
