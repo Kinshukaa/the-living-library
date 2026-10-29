@@ -22,7 +22,7 @@ export function AddItemDialog({ userId }: { userId: string }) {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("items").insert({ ...f, user_id: userId, status: "to_read" });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Added to your to-read pile.");
     qc.invalidateQueries({ queryKey: ["items"] });
     setOpen(false);
