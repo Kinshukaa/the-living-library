@@ -85,10 +85,10 @@ function Library() {
 
   function surprise() {
     const pool = filtered.length ? filtered : all;
-    if (!pool.length) return toast("Nothing to surprise you with yet.");
+    if (!pool.length) { toast("Nothing to surprise you with yet."); return; }
     const unopened = pool.filter((i) => i.open_count === 0);
     const from = unopened.length && Math.random() < 0.7 ? unopened : pool;
-    setOpen(from[Math.floor(Math.random() * from.length)]);
+    setOpen(from[Math.floor(Math.random() * from.length)] ?? null);
   }
 
   async function renameLibrary() {

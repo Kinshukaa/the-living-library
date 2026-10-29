@@ -40,7 +40,7 @@ export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: str
     e.preventDefault();
     if (!text.trim()) return;
     const { error } = await supabase.from("notes").insert({ item_id: item.id, user_id: userId, kind: noteKind, content: text.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setText("");
     qc.invalidateQueries({ queryKey: ["notes", item.id] });
   }
