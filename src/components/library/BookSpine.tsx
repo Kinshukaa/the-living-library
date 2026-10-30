@@ -1,6 +1,7 @@
 import type { Item } from "@/lib/library";
 import { spineHeight, spineWidth, wear } from "@/lib/library";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function BookSpine({ item, onOpen, lying = false }: { item: Item; onOpen: (i: Item) => void; lying?: boolean }) {
   const w = spineWidth(item.reading_minutes);
@@ -14,12 +15,12 @@ export function BookSpine({ item, onOpen, lying = false }: { item: Item; onOpen:
   style.filter = `saturate(${1 - worn * 0.55}) sepia(${worn * 0.35}) brightness(${1 - worn * 0.08})`;
 
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={() => onOpen(item)}
       title={`${item.title}${item.author ? " — " + item.author : ""}${item.open_count ? ` · opened ${item.open_count}×` : " · never opened"}`}
       className={cn(
-        "book-spine shrink-0 overflow-hidden text-primary-foreground",
+        "book-spine shrink-0 overflow-hidden p-0 whitespace-normal text-primary-foreground",
         worn >= 0.35 && "dog-ear",
         item.open_count === 0 && "pristine",
         isPaper && "rounded-sm",
@@ -33,11 +34,11 @@ export function BookSpine({ item, onOpen, lying = false }: { item: Item; onOpen:
       <span
         className={cn(
           "absolute inset-0 flex items-center justify-center px-0.5 font-display text-[10px] font-semibold leading-tight drop-shadow",
-          !lying && "[writing-mode:vertical-rl] rotate-180",
+          !lying && "[writing-mode:vertical-rl]",
         )}
       >
         <span className="line-clamp-2">{item.title}</span>
       </span>
-    </button>
+    </Button>
   );
 }

@@ -3,13 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Item, Note } from "@/lib/library";
-import { STATUSES, formatMinutes, humanAgo, kindLabel, playPageTurn } from "@/lib/library";
+import { STATUSES, formatMinutes, humanAgo, kindLabel, playPageTurn, shouldCelebrate } from "@/lib/library";
+import { AddItemDialog } from "./AddItemDialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: string; onClose: () => void }) {
+export function ReadingDesk({ item, userId, onClose, genres, onComplete, cat }: { item: Item; userId: string; onClose: () => void; genres: string[]; onComplete: () => void; cat: React.ReactNode }) {
   const qc = useQueryClient();
   const [flip, setFlip] = useState(0);
   const [text, setText] = useState("");
@@ -51,13 +52,17 @@ export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: str
   }
 
   async function setStatus(status: string) {
-    await supabase.from("items").update({ status }).eq("id", item.id);
+    const { error } = await supabase.from("items").update({ status }).eq("id", item.id);
+    if (error) { toast.error(error.message); return; }
+    if (shouldCelebrate(item.status, status)) onComplete();
     qc.invalidateQueries({ queryKey: ["items"] });
     toast.success(status === "read" ? "Shelved. Nicely done." : "Updated.");
   }
 
   async function remove() {
-    await supabase.from("items").delete().eq("id", item.id);
+    if (!window.confirm(`Remove “${item.title}” from your library?`)) return;
+    const { error } = await supabase.from("items").delete().eq("id", item.id);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["items"] });
     onClose();
   }
@@ -70,8 +75,9 @@ export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: str
         <div className="mb-4 flex flex-wrap items-center gap-3 text-primary-foreground">
           <span className="rounded-full bg-foreground/30 px-3 py-1 text-xs">{kindLabel(item.kind)} · {item.genre} · {formatMinutes(item.reading_minutes)}</span>
           <span className="text-xs opacity-80">Opened {item.open_count + 1}× · saved {humanAgo(item.created_at)}</span>
-          <div className="ml-auto flex items-center gap-2">
-            <Select defaultValue={item.status} onValueChange={setStatus}>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <AddItemDialog userId={userId} genres={genres} item={item} onComplete={onComplete} key={`${item.id}-${item.title}-${item.genre}-${item.placement}-${item.status}`} />
+            <Select value={item.status} onValueChange={setStatus}>
               <SelectTrigger className="w-32 bg-card text-card-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>{STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
             </Select>
@@ -87,6 +93,16 @@ export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: str
           </div>
 
           <aside className="space-y-3">
+            <label className="block text-primary-foreground text-sm">Shelf
+              <Select value={item.genre} onValueChange={async genre => {
+                const { error } = await supabase.from("items").update({ genre, placement: "shelf", sort_order: Date.now() }).eq("id", item.id);
+                if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["items"] });
+              }}><SelectTrigger aria-label="Book shelf" className="bg-card text-card-foreground"><SelectValue /></SelectTrigger><SelectContent>{genres.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent></Select>
+            </label>
+            <Button variant="secondary" className="w-full" onClick={async () => {
+              const { error } = await supabase.from("items").update({ placement: item.placement === "pile" ? "shelf" : "pile" }).eq("id", item.id);
+              if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["items"] });
+            }}>{item.placement === "pile" ? "Return to shelf" : "Move to to-read pile"}</Button>
             <form onSubmit={addNote} className="paper-sheet space-y-2 rounded-lg p-3">
               <div className="flex gap-1">
                 {(["highlight", "note"] as const).map((k) => (
@@ -112,6 +128,7 @@ export function ReadingDesk({ item, userId, onClose }: { item: Item; userId: str
               {notes.data?.length === 0 && <p className="text-center text-sm text-primary-foreground/80">No notes yet. The desk is suspiciously tidy.</p>}
             </div>
             <button onClick={remove} className="w-full text-xs text-primary-foreground/70 hover:underline">Remove from library</button>
+            {cat}
           </aside>
         </div>
       </div>
@@ -129,7 +146,7 @@ function OpenBook({ item, onTurn }: { item: Item; onTurn: () => void }) {
     <div className="grid overflow-hidden rounded-xl shadow-2xl sm:grid-cols-2" style={{ borderLeft: `14px solid var(--book-${item.color})` }}>
       <div className="paper-sheet flex min-h-80 flex-col justify-center p-8 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{item.genre}</p>
-        <h2 className="mt-3 text-4xl font-semibold">{item.title}</h2>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-semibold break-words">{item.title}</h2>
         {item.author && <p className="mt-3 italic">{item.author}</p>}
       </div>
       <div className="paper-sheet flex min-h-80 flex-col gap-4 border-l p-8">

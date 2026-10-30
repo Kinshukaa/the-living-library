@@ -10,11 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BookSpine } from "@/components/library/BookSpine";
 import { ReadingDesk } from "@/components/library/ReadingDesk";
 import { AddItemDialog } from "@/components/library/AddItemDialog";
+import { ManageShelves } from "@/components/library/ManageShelves";
+import { CatCompanion } from "@/components/library/CatCompanion";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Item, TimeOfDay } from "@/lib/library";
-import { GENRES, KINDS, STATUSES, kindLabel, nudge, playPurr, statusLabel, timeOfDay } from "@/lib/library";
+import { GENRES, KINDS, STATUSES, kindLabel, nudge, playPurr, statusLabel, timeOfDay, orderedItems } from "@/lib/library";
 import { cn } from "@/lib/utils";
 import room from "@/assets/room.jpg";
-import cat from "@/assets/cat.png";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -23,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/library")({
       { name: "description", content: "Your shelves, your desk, your to-read pile." },
       { property: "og:title", content: "My library — Bookscape" },
       { property: "og:description", content: "Your shelves, your desk, your to-read pile." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Library,
@@ -44,6 +48,8 @@ function Library() {
   const [tod, setTod] = useState<TimeOfDay>("afternoon");
   const [muted, setMuted] = useState(false);
   const [catWiggle, setCatWiggle] = useState(0);
+  const [arranging, setArranging] = useState(false);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => {
     setTod(timeOfDay());
@@ -65,7 +71,14 @@ function Library() {
     queryFn: async () => (await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()).data,
   });
 
-  const all = items.data ?? [];
+  const all = orderedItems(items.data ?? []);
+  const genres = profile.data?.genres ?? [...GENRES];
+  const catName = profile.data?.cat_name || "Mochi";
+  const selectedItem = open ? all.find(i => i.id === open.id) ?? open : null;
+  useEffect(() => {
+    if (genre !== "all" && !genres.includes(genre)) setGenre("all");
+    if (room_ !== "all" && !genres.includes(room_)) setRoom("all");
+  }, [genres, genre, room_]);
   const filtered = useMemo(() => {
     const s = q.toLowerCase();
     return all.filter((i) =>
@@ -76,12 +89,34 @@ function Library() {
       (room_ === "all" || i.genre === room_));
   }, [all, q, kind, genre, status, room_]);
 
-  const pile = filtered.filter((i) => i.status === "to_read");
-  const shelved = filtered.filter((i) => i.status !== "to_read");
-  const byGenre = GENRES.map((g) => ({ g, list: shelved.filter((i) => i.genre === g) })).filter((x) => x.list.length);
+  const pile = filtered.filter((i) => i.placement === "pile");
+  const shelved = filtered.filter((i) => i.placement !== "pile");
+  const byGenre = genres.filter(g => (room_ === "all" || room_ === g) && (genre === "all" || genre === g)).map((g) => ({ g, list: shelved.filter((i) => i.genre === g) }));
   const hint = nudge(all);
   const name = profile.data?.display_name || "reader";
   const libName = profile.data?.library_name || "Bookscape";
+
+  function celebrate() { playPurr(); setCatWiggle(c => c + 1); toast(`${catName} purrs happily. Another book finished!`); }
+  function petCat() { playPurr(); setCatWiggle(c => c + 1); toast(`${catName}: prrrrr… Happy you're here.`); }
+  async function nameCat() {
+    const value = window.prompt("What is your cat's name?", catName)?.trim();
+    if (!value) return;
+    const { error } = await supabase.from("profiles").upsert({ id: user.id, cat_name: value });
+    if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["profile"] });
+  }
+  async function shift(item: Item, direction: number) {
+    const shelf = all.filter(i => i.genre === item.genre && i.placement === item.placement);
+    const index = shelf.findIndex(i => i.id === item.id);
+    const swap = shelf[index + direction];
+    if (!swap) return;
+    [shelf[index], shelf[index + direction]] = [swap, item];
+    setReordering(true);
+    const results = await Promise.all(shelf.map((i, position) => supabase.from("items").update({ sort_order: position }).eq("id", i.id)));
+    const failed = results.find(r => r.error);
+    if (failed?.error) toast.error(failed.error.message);
+    await qc.invalidateQueries({ queryKey: ["items"] });
+    setReordering(false);
+  }
 
   function surprise() {
     const pool = filtered.length ? filtered : all;
@@ -129,12 +164,14 @@ function Library() {
               <p className="mt-2 text-lg">{HELLO[tod]}, {name}.</p>
               <p className="mt-1 text-muted-foreground">
                 {hint.text}{" "}
-                {hint.item && <button className="font-semibold text-primary hover:underline" onClick={() => setOpen(hint.item!)}>Open it now</button>}
+                {hint.item && <Button variant="link" className="px-0" onClick={() => { if (hint.item) setOpen(hint.item); }}>Open it now</Button>}
               </p>
+              <p className="mt-1 text-sm text-muted-foreground">{catName} stretches, happy to see you.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={surprise}>✨ Surprise me</Button>
-              <AddItemDialog userId={user.id} />
+              {!profile.isLoading && <AddItemDialog userId={user.id} genres={genres} key={genres.join("|")} />}
+              {!profile.isLoading && <ManageShelves userId={user.id} genres={genres} items={all} />}
               <Button variant="ghost" onClick={toggleMute} aria-label="Toggle sound">{muted ? "🔇" : "🔊"}</Button>
               <Button variant="ghost" onClick={signOut}>Sign out</Button>
             </div>
@@ -143,7 +180,7 @@ function Library() {
           <div className="mt-5 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto_auto]">
             <Input placeholder="Search titles, authors, notes…" value={q} onChange={(e) => setQ(e.target.value)} className="bg-card" />
             <Filter value={kind} set={setKind} label="All types" opts={KINDS.map((k) => [k.value, k.label])} />
-            <Filter value={genre} set={setGenre} label="All genres" opts={GENRES.map((g) => [g, g])} />
+            <Filter value={genre} set={setGenre} label="All genres" opts={genres.map((g) => [g, g])} />
             <Filter value={status} set={setStatus} label="Any status" opts={STATUSES.map((s) => [s.value, s.label])} />
             <div className="flex rounded-md bg-muted p-1">
               {(["shelf", "list"] as const).map((v) => (
@@ -159,20 +196,28 @@ function Library() {
           <>
             {/* rooms */}
             <nav className="mt-6 flex gap-2 overflow-x-auto pb-2">
-              {["all", ...GENRES].map((g) => (
-                <button key={g} onClick={() => setRoom(g)}
+              {["all", ...genres].map((g) => (
+                <Button variant="ghost" key={g} onClick={() => setRoom(g)}
                   className={cn("glass shrink-0 rounded-full px-4 py-1.5 text-sm shadow", room_ === g && "bg-primary text-primary-foreground")}>
                   {g === "all" ? "Whole house" : `${g} room`}
-                </button>
+                </Button>
               ))}
             </nav>
+            <Button variant="secondary" size="sm" aria-pressed={arranging} onClick={() => setArranging(v => !v)}>{arranging ? "Done arranging" : "Arrange books"}</Button>
 
             <section className="mt-4 grid gap-8 md:grid-cols-2">
               {byGenre.map(({ g, list }) => (
                 <div key={g} className="glass rounded-2xl p-4 shadow-lg">
                   <h2 className="mb-2 text-xl font-semibold">{g}</h2>
                   <div className="flex min-h-40 flex-wrap items-end gap-[3px] [perspective:800px]">
-                    {list.map((i) => <BookSpine key={i.id} item={i} onOpen={setOpen} />)}
+                    {list.map((i, index) => <div key={i.id} className="flex flex-col items-center gap-2">
+                      <BookSpine item={i} onOpen={setOpen} />
+                      {arranging && <div className="flex">
+                        <Button variant="ghost" className="h-7 w-6 p-0" title="Move left" aria-label={`Move ${i.title} left`} disabled={reordering || index === 0} onClick={() => shift(i, -1)}><ArrowLeft /></Button>
+                        <Button variant="ghost" className="h-7 w-6 p-0" title="Move right" aria-label={`Move ${i.title} right`} disabled={reordering || index === list.length - 1} onClick={() => shift(i, 1)}><ArrowRight /></Button>
+                      </div>}
+                    </div>)}
+                    {!list.length && <span className="self-center text-sm text-muted-foreground">Empty shelf</span>}
                   </div>
                   <div className="shelf-plank" />
                 </div>
@@ -206,7 +251,7 @@ function Library() {
         <div className="pointer-events-none fixed inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3">
           <div className="pointer-events-auto">
             <div className="glass mb-1 inline-block rounded-full px-3 py-0.5 text-xs shadow">To-read pile · {pile.length}{pile.length > 6 ? " (it’s growing…)" : ""}</div>
-            <div className="flex max-h-[40vh] flex-col-reverse items-start overflow-visible">
+            <div className="flex max-h-[30vh] flex-col-reverse items-start overflow-y-auto overflow-x-hidden px-3 py-2">
               {pile.map((i, idx) => (
                 <div key={i.id} style={{ transform: `translateX(${((idx * 13) % 17) - 8}px) rotate(${((idx * 29) % 9) - 4}deg)` }}>
                   <BookSpine item={i} onOpen={setOpen} lying />
@@ -214,18 +259,11 @@ function Library() {
               ))}
             </div>
           </div>
-          <button
-            className={cn("pointer-events-auto w-36 sm:w-44", catWiggle && "cat-wiggle")}
-            key={catWiggle}
-            onClick={() => { playPurr(); setCatWiggle((c) => c + 1); toast("Prrrr. The cat approves of your reading choices."); }}
-            aria-label="Pet the cat"
-          >
-            <img src={cat} alt="Sleeping cat" className="breathe" width={992} height={672} />
-          </button>
+          {!selectedItem && <CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} />}
         </div>
       )}
 
-      {open && <ReadingDesk item={open} userId={user.id} onClose={() => setOpen(null)} />}
+      {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} desk />} />}
     </div>
   );
 }

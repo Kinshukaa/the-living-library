@@ -25,7 +25,9 @@ export type Database = {
           kind: string
           last_opened_at: string | null
           open_count: number
+          placement: string
           reading_minutes: number
+          sort_order: number
           status: string
           title: string
           url: string | null
@@ -41,7 +43,9 @@ export type Database = {
           kind?: string
           last_opened_at?: string | null
           open_count?: number
+          placement?: string
           reading_minutes?: number
+          sort_order?: number
           status?: string
           title: string
           url?: string | null
@@ -57,7 +61,9 @@ export type Database = {
           kind?: string
           last_opened_at?: string | null
           open_count?: number
+          placement?: string
           reading_minutes?: number
+          sort_order?: number
           status?: string
           title?: string
           url?: string | null
@@ -102,20 +108,26 @@ export type Database = {
       }
       profiles: {
         Row: {
+          cat_name: string
           created_at: string
           display_name: string | null
+          genres: string[]
           id: string
           library_name: string
         }
         Insert: {
+          cat_name?: string
           created_at?: string
           display_name?: string | null
+          genres?: string[]
           id: string
           library_name?: string
         }
         Update: {
+          cat_name?: string
           created_at?: string
           display_name?: string | null
+          genres?: string[]
           id?: string
           library_name?: string
         }

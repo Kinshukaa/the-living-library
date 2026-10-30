@@ -3,6 +3,18 @@ import type { Database } from "@/integrations/supabase/types";
 export type Item = Database["public"]["Tables"]["items"]["Row"];
 export type Note = Database["public"]["Tables"]["notes"]["Row"];
 
+export function itemDestination(placement = "shelf") {
+  return placement === "pile" ? "pile" : "shelf";
+}
+
+export function orderedItems(items: Item[]) {
+  return [...items].sort((a, b) => a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+}
+
+export function shouldCelebrate(previous: string, next: string) {
+  return previous !== "read" && next === "read";
+}
+
 export const GENRES = [
   "Mythology", "Philosophy", "Current affairs", "Romance", "Sci-fi",
   "Health", "Non-fiction", "Fantasy", "Fiction",
@@ -82,9 +94,9 @@ export function nudge(items: Item[]): { text: string; item?: Item } {
   if (forgotten) return { text: `You saved “${forgotten.title}” ${humanAgo(forgotten.created_at)} and never opened it.`, item: forgotten };
   const reading = items.find((i) => i.status === "reading");
   if (reading) return { text: `“${reading.title}” is still open on your desk. Pick up where you left off?`, item: reading };
-  const pile = items.filter((i) => i.status === "to_read").length;
+  const pile = items.filter((i) => i.placement === "pile").length;
   if (pile) return { text: `Your to-read pile has ${pile} things on it. It’s judging you, gently.` };
-  return { text: "Everything’s read. Time to add something new." };
+  return { text: "Your next good read is waiting on the shelves." };
 }
 
 let ctx: AudioContext | null = null;
