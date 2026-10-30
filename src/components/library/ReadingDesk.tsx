@@ -75,8 +75,8 @@ export function ReadingDesk({ item, userId, onClose, genres, onComplete, cat }: 
         <div className="mb-4 flex flex-wrap items-center gap-3 text-primary-foreground">
           <span className="rounded-full bg-foreground/30 px-3 py-1 text-xs">{kindLabel(item.kind)} · {item.genre} · {formatMinutes(item.reading_minutes)}</span>
           <span className="text-xs opacity-80">Opened {item.open_count + 1}× · saved {humanAgo(item.created_at)}</span>
-          <div className="ml-auto flex items-center gap-2">
-            <AddItemDialog userId={userId} genres={genres} item={item} key={`${item.id}-${item.title}-${item.genre}-${item.placement}-${item.status}`} />
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <AddItemDialog userId={userId} genres={genres} item={item} onComplete={onComplete} key={`${item.id}-${item.title}-${item.genre}-${item.placement}-${item.status}`} />
             <Select value={item.status} onValueChange={setStatus}>
               <SelectTrigger className="w-32 bg-card text-card-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>{STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
@@ -146,7 +146,7 @@ function OpenBook({ item, onTurn }: { item: Item; onTurn: () => void }) {
     <div className="grid overflow-hidden rounded-xl shadow-2xl sm:grid-cols-2" style={{ borderLeft: `14px solid var(--book-${item.color})` }}>
       <div className="paper-sheet flex min-h-80 flex-col justify-center p-8 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{item.genre}</p>
-        <h2 className="mt-3 text-4xl font-semibold">{item.title}</h2>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-semibold break-words">{item.title}</h2>
         {item.author && <p className="mt-3 italic">{item.author}</p>}
       </div>
       <div className="paper-sheet flex min-h-80 flex-col gap-4 border-l p-8">

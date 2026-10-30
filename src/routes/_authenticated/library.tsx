@@ -170,8 +170,8 @@ function Library() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={surprise}>✨ Surprise me</Button>
-              <AddItemDialog userId={user.id} genres={genres} key={genres.join("|")} />
-              <ManageShelves userId={user.id} genres={genres} items={all} />
+              {!profile.isLoading && <AddItemDialog userId={user.id} genres={genres} key={genres.join("|")} />}
+              {!profile.isLoading && <ManageShelves userId={user.id} genres={genres} items={all} />}
               <Button variant="ghost" onClick={toggleMute} aria-label="Toggle sound">{muted ? "🔇" : "🔊"}</Button>
               <Button variant="ghost" onClick={signOut}>Sign out</Button>
             </div>
@@ -259,7 +259,7 @@ function Library() {
               ))}
             </div>
           </div>
-          <CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} />
+          {!selectedItem && <CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} />}
         </div>
       )}
 

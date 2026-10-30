@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { COLORS, GENRES, KINDS, STATUSES, itemDestination } from "@/lib/library";
+import { COLORS, GENRES, KINDS, STATUSES, itemDestination, shouldCelebrate } from "@/lib/library";
 import type { Item } from "@/lib/library";
 import { cn } from "@/lib/utils";
 
-export function AddItemDialog({ userId, genres = [...GENRES], item }: { userId: string; genres?: string[]; item?: Item }) {
+export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete }: { userId: string; genres?: string[]; item?: Item; onComplete?: () => void }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({
@@ -31,6 +31,7 @@ export function AddItemDialog({ userId, genres = [...GENRES], item }: { userId: 
       : await supabase.from("items").insert({ ...values, sort_order: Date.now() });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    if (item && shouldCelebrate(item.status, f.status)) onComplete?.();
     toast.success(item ? "Book updated." : f.placement === "pile" ? "Added to your to-read pile." : "Added to your shelf.");
     qc.invalidateQueries({ queryKey: ["items"] });
     setOpen(false);
