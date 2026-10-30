@@ -15,6 +15,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Step into your Bookscape library." },
       { property: "og:title", content: "Sign in — Bookscape" },
       { property: "og:description", content: "Step into your Bookscape library." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuthPage,

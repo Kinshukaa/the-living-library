@@ -212,6 +212,13 @@
 @utility breathe { animation: breathe 4s ease-in-out infinite; transform-origin: bottom center; }
 @keyframes breathe { 0%,100% { transform: scaleY(1) } 50% { transform: scaleY(1.03) } }
 
+.cat-hearts { animation: cat-hearts 1.8s ease-out both; pointer-events: none; }
+@keyframes cat-hearts { from { opacity: 1; transform: translateY(0) scale(.8); } to { opacity: 0; transform: translateY(-55px) scale(1.2); } }
+@media (prefers-reduced-motion: reduce) {
+  .cat-hearts, .cat-wiggle, .breathe, .fairy, .page-flip { animation: none; }
+  .book-spine { transition: none; }
+}
+
 @utility glass {
   background: color-mix(in oklab, var(--card) 82%, transparent);
   backdrop-filter: blur(10px);
