@@ -1,5 +1,5 @@
 # Library updates
-- [ ] Upright spines and shelf-first, editable books with manual pile placement.
-- [ ] Persist custom genres, moving books, and custom ordering.
-- [ ] Named cat with welcome, petting, desk presence, and completion celebrations.
-- [ ] Verify rules and signed-in library flows.
+- [x] Upright spines and shelf-first, editable books with manual pile placement.
+- [x] Persist custom genres, moving books, and custom ordering.
+- [x] Named cat with welcome, petting, desk presence, and completion celebrations.
+- [x] Verify rules and signed-in library flows.
