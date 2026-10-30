@@ -8,6 +8,13 @@
       "when": 1793255856491,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793325623815,
+      "tag": "0001_reader_shelf_controls_and_cat",
+      "breakpoints": true
     }
   ]
 }
