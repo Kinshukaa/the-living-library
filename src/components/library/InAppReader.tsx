@@ -33,8 +33,9 @@ export function paginate(text: string, size = 1100) {
   const pages: string[][] = [[]];
   let len = 0;
   for (const p of paras) {
-    if (len + p.length > size && pages[pages.length - 1].length) { pages.push([]); len = 0; }
-    pages[pages.length - 1].push(p); len += p.length;
+    let last = pages[pages.length - 1]!;
+    if (len + p.length > size && last.length) { last = []; pages.push(last); len = 0; }
+    last.push(p); len += p.length;
   }
   return pages;
 }

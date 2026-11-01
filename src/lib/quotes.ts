@@ -27,5 +27,5 @@ export const QUOTES: Quote[] = [
 export function quoteOfDay(highlights: Quote[] = [], date = new Date()): Quote {
   const pool = [...QUOTES, ...highlights];
   const day = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
-  return pool[day % pool.length];
+  return pool[day % pool.length] ?? QUOTES[0]!;
 }

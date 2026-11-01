@@ -12,7 +12,7 @@ Explain in at most ~180 words, in plain language:
 STRICT NO-SPOILER RULE: never reveal plot events, twists, character fates, endings, or anything that happens later in the work. Discuss only what the passage itself and general, spoiler-free context about the work and author show. If explaining fully would need a spoiler, say so and stop short.`;
 
 export async function explainLine(input: { title: string; author: string | null; line: string }) {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) throw new Error("AI is not configured.");
   let runId: string | undefined;
   const provider = createOpenAI({
