@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Item, Note } from "@/lib/library";
 import { STATUSES, formatMinutes, humanAgo, kindLabel, playPageTurn, shouldCelebrate } from "@/lib/library";
 import { AddItemDialog } from "./AddItemDialog";
+import { InAppReader } from "./InAppReader";
+import { Candle } from "./Candle";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +17,7 @@ export function ReadingDesk({ item, userId, onClose, genres, onComplete, cat }: 
   const [flip, setFlip] = useState(0);
   const [text, setText] = useState("");
   const [noteKind, setNoteKind] = useState<"note" | "highlight">("highlight");
+  const [reading, setReading] = useState(false);
 
   useEffect(() => {
     playPageTurn();
@@ -86,13 +89,25 @@ export function ReadingDesk({ item, userId, onClose, genres, onComplete, cat }: 
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-3">
+          <div className="flex gap-2">
+            <Button size="sm" variant={reading ? "secondary" : "default"} onClick={() => setReading(false)}>Cover</Button>
+            <Button size="sm" variant={reading ? "default" : "secondary"} onClick={() => setReading(true)}>📖 Read here</Button>
+          </div>
+          {reading ? <InAppReader item={item} onHighlight={async (line) => {
+            const { error } = await supabase.from("notes").insert({ item_id: item.id, user_id: userId, kind: "highlight", content: line });
+            if (error) throw error;
+            qc.invalidateQueries({ queryKey: ["notes", item.id] });
+          }} /> :
           <div key={flip} className={cn(flip > 0 && "page-flip")}>
             {item.kind === "book" ? <OpenBook item={item} onTurn={turn} />
               : item.kind === "newsletter" || item.kind === "clipping" ? <Newspaper item={item} />
               : <Journal item={item} />}
+          </div>}
           </div>
 
           <aside className="space-y-3">
+            <Candle />
             <label className="block text-primary-foreground text-sm">Shelf
               <Select value={item.genre} onValueChange={async genre => {
                 const { error } = await supabase.from("items").update({ genre, placement: "shelf", sort_order: Date.now() }).eq("id", item.id);

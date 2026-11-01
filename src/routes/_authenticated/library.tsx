@@ -16,6 +16,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Item, TimeOfDay } from "@/lib/library";
 import { GENRES, KINDS, STATUSES, kindLabel, nudge, playPurr, statusLabel, timeOfDay, orderedItems } from "@/lib/library";
 import { cn } from "@/lib/utils";
+import { quoteOfDay } from "@/lib/quotes";
 import room from "@/assets/room.jpg";
 
 export const Route = createFileRoute("/_authenticated/library")({
@@ -93,6 +94,11 @@ function Library() {
   const shelved = filtered.filter((i) => i.placement !== "pile");
   const byGenre = genres.filter(g => (room_ === "all" || room_ === g) && (genre === "all" || genre === g)).map((g) => ({ g, list: shelved.filter((i) => i.genre === g) }));
   const hint = nudge(all);
+  const highlights = useQuery({
+    queryKey: ["highlights"],
+    queryFn: async () => (await supabase.from("notes").select("content, item_id").eq("kind", "highlight").limit(50)).data ?? [],
+  });
+  const quote = quoteOfDay((highlights.data ?? []).map(h => ({ text: h.content, by: `your highlight from ${all.find(i => i.id === h.item_id)?.title ?? "your library"}` })));
   const name = profile.data?.display_name || "reader";
   const libName = profile.data?.library_name || "Bookscape";
 
@@ -162,6 +168,7 @@ function Library() {
                 <h1 className="text-4xl font-semibold sm:text-5xl">{libName} <span className="text-base opacity-0 group-hover:opacity-60">✎</span></h1>
               </button>
               <p className="mt-2 text-lg">{HELLO[tod]}, {name}.</p>
+              <blockquote className="mt-2 border-l-2 border-primary pl-3 font-display italic">“{quote.text}” <span className="not-italic text-sm text-muted-foreground">— {quote.by}</span></blockquote>
               <p className="mt-1 text-muted-foreground">
                 {hint.text}{" "}
                 {hint.item && <Button variant="link" className="px-0" onClick={() => { if (hint.item) setOpen(hint.item); }}>Open it now</Button>}

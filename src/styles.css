@@ -223,3 +223,12 @@
   background: color-mix(in oklab, var(--card) 82%, transparent);
   backdrop-filter: blur(10px);
 }
+
+.candle-flame {
+  width: 10px; height: 18px; border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 50% 70%, var(--highlight), var(--book-amber) 60%, transparent 75%);
+  box-shadow: 0 0 18px 6px color-mix(in oklab, var(--book-amber) 45%, transparent);
+  animation: flicker 1.6s ease-in-out infinite alternate; transform-origin: bottom center;
+}
+@keyframes flicker { 0% { transform: scale(1) rotate(-2deg); opacity: .95 } 50% { transform: scale(1.08,.94) rotate(2deg) } 100% { transform: scale(.95,1.06) rotate(-1deg); opacity: .85 } }
+@media (prefers-reduced-motion: reduce) { .candle-flame { animation: none } }
