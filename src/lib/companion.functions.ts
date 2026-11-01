@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const askCompanion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { title: string; author: string | null; line: string }) => {
+  .validator((d: { title: string; author: string | null; line: string }) => {
     const line = String(d.line ?? "").trim().slice(0, 1500);
     if (!line) throw new Error("Pick a line first.");
     return { title: String(d.title ?? "").slice(0, 300), author: d.author ? String(d.author).slice(0, 200) : null, line };
