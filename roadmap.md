@@ -8,3 +8,7 @@
 - [x] In-app reader (EPUB/text/paste), page turns, highlights.
 - [x] Desk candle that burns while reading.
 - [x] Spoiler-free AI line explainer.
+# Current asks
+- [ ] Test opening, page turns, highlighting, companion; fix failures.
+- [ ] Explain Project Hail Mary starter book.
+- [ ] Refresh GitHub README (concise, professional) with full feature summary.
