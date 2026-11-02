@@ -1,29 +1,70 @@
-# The Living Library
+# Bookscape
 
-Building my own 3d book library of topics, research articles, essays, newsletters, anything I like. Making i interactive, fun, and just like an app, with an interface, greeting, etc. I would like to add actual books available online(like The Forest of enchantments, one of my favs, rich dad, poor dad, atomic habits, david brooks, satvik revolution, etc., and then group them into genres like mythology, philosophy, current affairs, romance, sci fi, heath, non fiction, fantasy, fiction, etc.), newsletters like You Had Me at Hello, newspaper clippings and research articles from @Nature and other legible sources. (like https://www.nature.com/articles/d41586-025-04096-z, and https://feinstein.northwell.edu/institutes-researchers/institute-molecular-medicine/robert-s-boas-center-for-genomics-and-human-genetics/rose-research-outsmarts-endometriosis). I want to capture my journey on GitHub, my first one. And make it available on web with a search bar, interface, login, filters, and a flat list view as an escape hatch. And a surprise me button. Also, Wear and tear: books you’ve read often get dog-eared or faded spines, and untouched ones stay pristine. Your shelf becomes a visual record of your attention.
+**A cozy, personal library for books, essays, newsletters, clippings and research — that remembers what you pay attention to.**
 
-* A “reading desk”: pulling a book out opens it on a desk, with notes and highlights stacked beside it.
-* A greeting that does something: it could surface “you saved this 3 weeks ago and never opened it,” which is more useful than “Good morning!”
-* Rooms or shelves by theme, with a “to read” pile on the floor that grows guiltily.
-* Ambient touches: lighting that shifts with time of day, page-turn sounds, a cat. Small details are what make an app feel alive. ALL OF THESE!
+[Live app](https://living-library-of-ideas.lovable.app) · Built with TanStack Start, React 19, Tailwind CSS v4 and Lovable Cloud
 
-This project was built with [Lovable](https://lovable.dev).
+---
 
-## Build with Lovable
+## Why
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/b0c3cf80-e269-546f-aab9-87424ee31a86).
+Reading lists are flat. Bookscape turns them into a room: shelves by theme, a reading desk, a guilty to-read pile on the floor, and a cat who notices when you finish something. Your shelf becomes a visual record of your attention.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Features
 
-## Development
+**Library**
+- Themed shelves ("rooms") for books, newsletters, clippings, articles, research papers and essays
+- Starter collection on sign-up (e.g. *The Forest of Enchantments*, *Atomic Habits*, *You Had Me at Hello*, Nature and Feinstein research articles)
+- Add and edit any item; new items go straight onto a genre shelf
+- Create, rename-by-replacement and remove genres; books are reassigned before a shelf is removed
+- Move books between shelves and arrange their order; arrangement persists
+- Manual to-read pile on the floor — books only go there when you put them there
+- Wear and tear: frequently opened spines fade and dog-ear; untouched ones stay pristine
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+**Finding things**
+- Search across titles, authors and notes
+- Filters by type, genre and status
+- Room switcher, shelf view and flat list view
+- ✨ Surprise me — opens a random item
+
+**Reading desk**
+- Pull a book out to open it on a desk with cover, newspaper or journal layouts
+- Status tracking (to read, reading, read) and open counts
+- Notes and highlights stacked beside the book as sticky notes
+- In-app reader: load your own EPUB or text file, or paste an article; two-page spread, page-turn animation and sound, remembers your page; copies stay on your device
+- Select text to highlight it or ask the **spoiler-free AI companion** what a line means
+- A candle that burns down while you read
+
+**Greeting and atmosphere**
+- Greeting that nudges you ("still open on your desk", "saved weeks ago, never opened")
+- Inspiring quote of the day, mixed with your own highlights
+- Lighting that shifts with the time of day, fairy lights, page-turn sounds (mutable), reduced-motion support
+
+**The cat**
+- Name your cat; it greets you, purrs when petted, joins you at the desk and celebrates finished books
+
+**Accounts**
+- Email/password, Google and Lovable sign-in; each reader's library, genres and cat are private
+
+## Tech
+
+| Layer | Choice |
+| --- | --- |
+| App | TanStack Start (React 19, Vite 7), file-based routing |
+| Styling | Tailwind CSS v4 with semantic design tokens |
+| Data & auth | Lovable Cloud (Postgres with row-level security) |
+| AI | Lovable AI Gateway via a server function |
+| Reader | epub.js, IndexedDB for local copies |
+
+## Run locally
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
 npm run dev
 ```
+
+Tests: `bunx vitest run`
+
+## Journey
+
+My first GitHub project — built iteratively with [Lovable](https://lovable.dev), one cozy detail at a time.
