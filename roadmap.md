@@ -9,6 +9,6 @@
 - [x] Desk candle that burns while reading.
 - [x] Spoiler-free AI line explainer.
 # Current asks
-- [ ] Test opening, page turns, highlighting, companion; fix failures.
-- [ ] Explain Project Hail Mary starter book.
-- [ ] Refresh GitHub README (concise, professional) with full feature summary.
+- [x] Test opening, page turns, highlighting, companion; fix failures.
+- [x] Explain Project Hail Mary starter book.
+- [x] Refresh GitHub README (concise, professional) with full feature summary.
