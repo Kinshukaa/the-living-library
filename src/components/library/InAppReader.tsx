@@ -125,9 +125,25 @@ function TextBook({ item, text, onHighlight }: { item: Item; text: string; onHig
     playPageTurn(); setFlip(f => f + 1); setP(next); localStorage.setItem(key, String(next));
   }
   const capture = () => tools.setSel(window.getSelection()?.toString().trim() ?? "");
+  const pageRef = useRef<HTMLDivElement>(null);
+  const setSel = tools.setSel;
+  // Phones select text by long-press without firing touchend reliably, so watch selection changes.
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const onChange = () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        const s = window.getSelection();
+        const txt = s?.toString().trim() ?? "";
+        if (txt && s?.anchorNode && pageRef.current?.contains(s.anchorNode)) setSel(txt);
+      }, 250);
+    };
+    document.addEventListener("selectionchange", onChange);
+    return () => { clearTimeout(t); document.removeEventListener("selectionchange", onChange); };
+  }, [setSel]);
   return (
     <div className="space-y-3">
-      <div key={flip} onMouseUp={capture} onTouchEnd={capture}
+      <div key={flip} ref={pageRef} onMouseUp={capture} onTouchEnd={capture}
         className="page-flip grid overflow-hidden rounded-xl shadow-2xl sm:grid-cols-2" style={{ borderLeft: `14px solid var(--book-${item.color})` }}>
         {[p, p + 1].map(i => (
           <div key={i} className="paper-sheet min-h-96 border-l p-6 font-display text-[17px] leading-relaxed sm:p-8">
