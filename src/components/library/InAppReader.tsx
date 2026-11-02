@@ -74,6 +74,14 @@ export function InAppReader({ item, onHighlight }: { item: Item; onHighlight: (l
   );
 }
 
+// Render **bold** and *italic* from the companion without showing raw asterisks.
+export function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*\n]+\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") && part.length > 4 ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : part.startsWith("*") && part.endsWith("*") && part.length > 2 ? <em key={i}>{part.slice(1, -1)}</em>
+      : part);
+}
+
 function useSelectionTools(item: Item, onHighlight: (l: string) => Promise<void>) {
   const ask = useServerFn(askCompanion);
   const [sel, setSel] = useState("");
@@ -98,7 +106,7 @@ function useSelectionTools(item: Item, onHighlight: (l: string) => Promise<void>
     <div className="paper-sheet relative rounded-lg p-4 font-sans text-sm leading-relaxed">
       <button className="absolute right-2 top-1 text-xs text-muted-foreground" onClick={() => setAnswer(null)} aria-label="Close explanation">✕</button>
       <p className="mb-2 font-display italic">“{answer.line}”</p>
-      <p className="whitespace-pre-wrap">{answer.text}</p>
+      <p className="whitespace-pre-wrap">{renderInline(answer.text)}</p>
     </div>
   );
   return { setSel, bar, panel };
