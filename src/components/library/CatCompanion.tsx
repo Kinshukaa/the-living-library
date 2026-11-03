@@ -33,7 +33,7 @@ export function CatCompanion({ name, type, lastFedAt, celebration, onPet, onName
     if (desk || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => {
       setX(prev => {
-        const next = Math.round(Math.random() * 70);
+        const next = Math.round(Math.random() * 60);
         setFacingLeft(next < prev);
         return next;
       });
