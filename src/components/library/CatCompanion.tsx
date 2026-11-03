@@ -60,7 +60,7 @@ export function CatCompanion({ name, type, lastFedAt, celebration, onPet, onName
 
   function pet() { setHearts(h => h + 1); onPet(); }
   async function enableReminders() {
-    if (typeof Notification === "undefined") return toast("Your browser doesn't support notifications.");
+    if (typeof Notification === "undefined") { toast("Your browser doesn't support notifications."); return; }
     const p = await Notification.requestPermission();
     toast(p === "granted" ? `${name} will nudge you when hungry.` : "Reminders will show only while the app is open.");
   }
