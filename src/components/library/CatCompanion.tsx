@@ -66,8 +66,8 @@ export function CatCompanion({ name, type, lastFedAt, celebration, onPet, onName
   }
 
   const burst = celebration + hearts;
-  return <div className={cn("pointer-events-auto", desk ? "mx-auto w-32" : "w-full")}>
-    <div className={cn("relative flex flex-col items-center", desk ? "w-32" : "w-32 sm:w-40")} style={desk ? undefined : { marginLeft: `${x}%`, transition: "margin-left 6s ease-in-out" }}>
+  return <div className={cn(desk ? "pointer-events-auto mx-auto w-32" : "pointer-events-none min-w-0 flex-1")}>
+    <div className={cn("pointer-events-auto relative flex flex-col items-center", desk ? "w-32" : "w-32 sm:w-40")} style={desk ? undefined : { marginLeft: `${x}%`, transition: "margin-left 6s ease-in-out" }}>
       {burst > 0 && <span key={burst} className="cat-hearts absolute -top-5 flex gap-3 text-primary" aria-label={`${name} is happy`}><Heart fill="currentColor" /><Heart fill="currentColor" /><Heart fill="currentColor" /></span>}
       {hungry && <span className="glass absolute -top-7 right-0 rounded-full px-2 py-0.5 text-xs shadow">hungry…</span>}
       <Button variant="ghost" className={cn("h-auto w-full p-0 hover:bg-transparent", burst > 0 && "cat-wiggle")} key={`pet-${burst}`} onClick={pet} aria-label={`Pet ${name}`} title={petSound(type)}>
