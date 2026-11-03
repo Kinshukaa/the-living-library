@@ -187,7 +187,7 @@ function Library() {
                 {hint.text}{" "}
                 {hint.item && <Button variant="link" className="px-0" onClick={() => { if (hint.item) setOpen(hint.item); }}>Open it now</Button>}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{catName} stretches, happy to see you.</p>
+              <p className="mt-1 text-sm text-muted-foreground">{catName} {petType === "dog" ? "wags their tail" : "stretches"}, happy to see you.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={surprise}>✨ Surprise me</Button>
