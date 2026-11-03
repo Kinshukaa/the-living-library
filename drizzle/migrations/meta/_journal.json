@@ -15,6 +15,13 @@
       "when": 1793325623815,
       "tag": "0001_reader_shelf_controls_and_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793696048440,
+      "tag": "0002_pet_choice_feeding",
+      "breakpoints": true
     }
   ]
 }

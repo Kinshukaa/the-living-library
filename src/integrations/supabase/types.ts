@@ -114,6 +114,8 @@ export type Database = {
           genres: string[]
           id: string
           library_name: string
+          pet_last_fed_at: string | null
+          pet_type: string
         }
         Insert: {
           cat_name?: string
@@ -122,6 +124,8 @@ export type Database = {
           genres?: string[]
           id: string
           library_name?: string
+          pet_last_fed_at?: string | null
+          pet_type?: string
         }
         Update: {
           cat_name?: string
@@ -130,6 +134,8 @@ export type Database = {
           genres?: string[]
           id?: string
           library_name?: string
+          pet_last_fed_at?: string | null
+          pet_type?: string
         }
         Relationships: []
       }
