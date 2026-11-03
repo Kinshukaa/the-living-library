@@ -65,6 +65,15 @@ npm run dev
 
 Tests: `bunx vitest run`
 
+## Roadmap
+
+- **Reader formats:** PDF upload and reading, print-matched page numbers, one-click article import
+- **Conversational companion:** follow-up questions with book and passage context, voiced by your pet, still spoiler-free
+- **Pet companion:** choose a cat or dog that roams the room, asks to be fed on a schedule, and greets you with notification-style nudges
+- **Newsletters as newspapers:** folded broadsheets with mastheads, columns and aged paper instead of spines
+- **Music & soundscapes:** gramophone player with rain, lo-fi, piano and fireplace tracks, plus your own audio uploads
+- **Detective board & mailbox:** link related items with yarn on a corkboard; new newsletter issues arrive as letters on the doormat
+
 ## Journey
 
 My first GitHub project — built iteratively with [Lovable](https://lovable.dev), one cozy detail at a time.
