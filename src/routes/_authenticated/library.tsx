@@ -12,6 +12,7 @@ import { ReadingDesk } from "@/components/library/ReadingDesk";
 import { AddItemDialog } from "@/components/library/AddItemDialog";
 import { ManageShelves } from "@/components/library/ManageShelves";
 import { CatCompanion } from "@/components/library/CatCompanion";
+import { defaultPetName, petSound, type PetType } from "@/lib/pet";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Item, TimeOfDay } from "@/lib/library";
 import { GENRES, KINDS, STATUSES, kindLabel, nudge, playPurr, statusLabel, timeOfDay, orderedItems } from "@/lib/library";
@@ -74,7 +75,8 @@ function Library() {
 
   const all = orderedItems(items.data ?? []);
   const genres = profile.data?.genres ?? [...GENRES];
-  const catName = profile.data?.cat_name || "Mochi";
+  const petType: PetType = profile.data?.pet_type === "dog" ? "dog" : "cat";
+  const catName = profile.data?.cat_name || defaultPetName(petType);
   const selectedItem = open ? all.find(i => i.id === open.id) ?? open : null;
   useEffect(() => {
     if (genre !== "all" && !genres.includes(genre)) setGenre("all");
@@ -102,14 +104,26 @@ function Library() {
   const name = profile.data?.display_name || "reader";
   const libName = profile.data?.library_name || "Bookscape";
 
-  function celebrate() { playPurr(); setCatWiggle(c => c + 1); toast(`${catName} purrs happily. Another book finished!`); }
-  function petCat() { playPurr(); setCatWiggle(c => c + 1); toast(`${catName}: prrrrr… Happy you're here.`); }
-  async function nameCat() {
-    const value = window.prompt("What is your cat's name?", catName)?.trim();
-    if (!value) return;
-    const { error } = await supabase.from("profiles").upsert({ id: user.id, cat_name: value });
+  function celebrate() { if (petType === "cat") playPurr(); setCatWiggle(c => c + 1); toast(`${catName} ${petType === "dog" ? "wags happily" : "purrs happily"}. Another book finished!`); }
+  function petCat() { if (petType === "cat") playPurr(); toast(`${catName}: ${petSound(petType)} Happy you're here.`); }
+  async function savePet(patch: { cat_name?: string; pet_type?: PetType; pet_last_fed_at?: string }) {
+    const { error } = await supabase.from("profiles").upsert({ id: user.id, ...patch });
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["profile"] });
+    return !error;
   }
+  async function nameCat() {
+    const value = window.prompt(`What is your ${petType}'s name?`, catName)?.trim();
+    if (value) await savePet({ cat_name: value });
+  }
+  async function feedPet() {
+    if (await savePet({ pet_last_fed_at: new Date().toISOString() })) { setCatWiggle(c => c + 1); toast(`${catName} munches happily. ${petType === "dog" ? "🦴" : "🐟"}`); }
+  }
+  async function switchPet() {
+    const next: PetType = petType === "dog" ? "cat" : "dog";
+    const renamed = catName === defaultPetName(petType) ? defaultPetName(next) : catName;
+    await savePet({ pet_type: next, cat_name: renamed });
+  }
+  const petProps = { name: catName, type: petType, lastFedAt: profile.data?.pet_last_fed_at ?? null, celebration: catWiggle, onPet: petCat, onName: nameCat, onFeed: feedPet, onSwitchType: switchPet };
   async function shift(item: Item, direction: number) {
     const shelf = all.filter(i => i.genre === item.genre && i.placement === item.placement);
     const index = shelf.findIndex(i => i.id === item.id);
@@ -173,7 +187,7 @@ function Library() {
                 {hint.text}{" "}
                 {hint.item && <Button variant="link" className="px-0" onClick={() => { if (hint.item) setOpen(hint.item); }}>Open it now</Button>}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{catName} stretches, happy to see you.</p>
+              <p className="mt-1 text-sm text-muted-foreground">{catName} {petType === "dog" ? "wags their tail" : "stretches"}, happy to see you.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={surprise}>✨ Surprise me</Button>
@@ -266,11 +280,11 @@ function Library() {
               ))}
             </div>
           </div>
-          {!selectedItem && <CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} />}
+          {!selectedItem && <CatCompanion {...petProps} />}
         </div>
       )}
 
-      {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} desk />} />}
+      {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion {...petProps} desk />} />}
     </div>
   );
 }

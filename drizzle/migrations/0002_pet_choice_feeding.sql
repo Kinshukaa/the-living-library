@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS pet_type text NOT NULL DEFAULT 'cat' CHECK (pet_type IN ('cat','dog')), ADD COLUMN IF NOT EXISTS pet_last_fed_at timestamptz;
