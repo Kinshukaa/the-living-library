@@ -280,11 +280,11 @@ function Library() {
               ))}
             </div>
           </div>
-          {!selectedItem && <CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} />}
+          {!selectedItem && <CatCompanion {...petProps} />}
         </div>
       )}
 
-      {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion name={catName} celebration={catWiggle} onPet={petCat} onName={nameCat} desk />} />}
+      {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion {...petProps} desk />} />}
     </div>
   );
 }
