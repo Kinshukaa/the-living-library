@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import "@lovable.dev/cloud-auth-js/styles.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import room from "@/assets/room.jpg";
@@ -57,7 +56,7 @@ function AuthPage() {
     setBusy(false);
   }
 
-  async function oauth(p: "google" | "lovable") {
+  async function oauth(p: "google") {
     const r = await lovable.auth.signInWithOAuth(p, { redirect_uri: window.location.origin + "/auth" });
     if (r.error) toast.error(String(r.error.message ?? r.error));
   }
@@ -79,7 +78,6 @@ function AuthPage() {
         <div className="my-4 text-center text-xs text-muted-foreground">or</div>
         <div className="space-y-2">
           <Button variant="outline" className="w-full" onClick={() => oauth("google")}>Continue with Google</Button>
-          <button type="button" className="lovable-auth-button w-full" onClick={() => oauth("lovable")}>Continue with Lovable</button>
         </div>
         <button className="mt-5 w-full text-sm text-primary underline-offset-4 hover:underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
           {mode === "in" ? "New here? Create an account" : "Already have one? Sign in"}
