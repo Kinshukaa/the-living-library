@@ -94,6 +94,7 @@ function Library() {
 
   const pile = filtered.filter((i) => i.placement === "pile");
   const shelved = filtered.filter((i) => i.placement !== "pile");
+  const isEmpty = !items.isLoading && all.length === 0;
   const byGenre = genres.filter(g => (room_ === "all" || room_ === g) && (genre === "all" || genre === g)).map((g) => ({ g, list: shelved.filter((i) => i.genre === g) }));
   const hint = nudge(all);
   const highlights = useQuery({
@@ -198,7 +199,7 @@ function Library() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto_auto]">
+          {!isEmpty && <div className="mt-5 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto_auto]">
             <Input placeholder="Search titles, authors, notes…" value={q} onChange={(e) => setQ(e.target.value)} className="bg-card" />
             <Filter value={kind} set={setKind} label="All types" opts={KINDS.map((k) => [k.value, k.label])} />
             <Filter value={genre} set={setGenre} label="All genres" opts={genres.map((g) => [g, g])} />
@@ -208,12 +209,36 @@ function Library() {
                 <button key={v} onClick={() => setView(v)} className={cn("rounded px-3 text-sm", view === v && "bg-card shadow")}>{v === "shelf" ? "Shelves" : "List"}</button>
               ))}
             </div>
-          </div>
+          </div>}
         </header>
 
         {items.isLoading && <p className="mt-10 text-center">Dusting the shelves…</p>}
 
-        {view === "shelf" ? (
+        {isEmpty && (
+          <section className="mx-auto mt-10 max-w-xl">
+            <div className="glass rounded-3xl p-8 text-center shadow-xl">
+              <div className="text-5xl" aria-hidden>📚</div>
+              <h2 className="mt-3 text-2xl font-semibold">Your shelves are waiting</h2>
+              <p className="mt-2 text-muted-foreground">
+                This is your own little library — books you love, newsletters you save, articles worth keeping.
+                Add your first one and the shelves will start to feel like home.
+              </p>
+              {!profile.isLoading && (
+                <AddItemDialog
+                  userId={user.id}
+                  genres={genres}
+                  key={`empty-${genres.join("|")}`}
+                  trigger={<Button size="lg" className="mt-5">📖 Add your first book</Button>}
+                />
+              )}
+              <p className="mt-4 text-sm text-muted-foreground">
+                It goes straight onto a genre shelf — the to-read pile is only for things you put there yourself.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {!isEmpty && (view === "shelf" ? (
           <>
             {/* rooms */}
             <nav className="mt-6 flex gap-2 overflow-x-auto pb-2">
