@@ -289,11 +289,11 @@ function Library() {
               </TableBody>
             </Table>
           </div>
-        )}
+        ))}
       </div>
 
       {/* floor: to-read pile + cat */}
-      {view === "shelf" && (
+      {!isEmpty && view === "shelf" && (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3">
           <div className="pointer-events-auto">
             <div className="glass mb-1 inline-block rounded-full px-3 py-0.5 text-xs shadow">To-read pile · {pile.length}{pile.length > 6 ? " (it’s growing…)" : ""}</div>
