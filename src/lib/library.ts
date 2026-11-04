@@ -88,6 +88,7 @@ export function timeOfDay(h = new Date().getHours()): TimeOfDay {
 
 /** A greeting that does something: surface a neglected save. */
 export function nudge(items: Item[]): { text: string; item?: Item } {
+  if (!items.length) return { text: "Your library is brand new — every great collection starts with a first book." };
   const forgotten = items
     .filter((i) => i.open_count === 0 && daysAgo(i.created_at) >= 7)
     .sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))[0];

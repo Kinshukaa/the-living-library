@@ -12,3 +12,5 @@
 - [x] Test opening, page turns, highlighting, companion; fix failures.
 - [x] Explain Project Hail Mary starter book.
 - [x] Refresh GitHub README (concise, professional) with full feature summary.
+- [x] Cat-or-dog companion with petting and feeding reminders; pet stays in one spot.
+- [x] Empty state: brand-new accounts get a welcome card inviting a first book.
