@@ -11,7 +11,7 @@ import { COLORS, GENRES, KINDS, STATUSES, itemDestination, shouldCelebrate } fro
 import type { Item } from "@/lib/library";
 import { cn } from "@/lib/utils";
 
-export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete }: { userId: string; genres?: string[]; item?: Item; onComplete?: () => void }) {
+export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, trigger }: { userId: string; genres?: string[]; item?: Item; onComplete?: () => void; trigger?: React.ReactNode }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({
@@ -40,7 +40,7 @@ export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button variant={item ? "secondary" : "default"}>{item ? "Edit book" : "+ Add"}</Button></DialogTrigger>
+      <DialogTrigger asChild>{trigger ?? <Button variant={item ? "secondary" : "default"}>{item ? "Edit book" : "+ Add"}</Button>}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg">
         <DialogHeader><DialogTitle>{item ? "Edit your book" : "Add to your library"}</DialogTitle></DialogHeader>
         <form onSubmit={save} className="space-y-3">
