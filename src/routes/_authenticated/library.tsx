@@ -293,18 +293,20 @@ function Library() {
       </div>
 
       {/* floor: to-read pile + cat */}
-      {!isEmpty && view === "shelf" && (
+      {view === "shelf" && (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3">
-          <div className="pointer-events-auto">
-            <div className="glass mb-1 inline-block rounded-full px-3 py-0.5 text-xs shadow">To-read pile · {pile.length}{pile.length > 6 ? " (it’s growing…)" : ""}</div>
-            <div className="flex max-h-[30vh] flex-col-reverse items-start overflow-y-auto overflow-x-hidden px-3 py-2">
-              {pile.map((i, idx) => (
-                <div key={i.id} style={{ transform: `translateX(${((idx * 13) % 17) - 8}px) rotate(${((idx * 29) % 9) - 4}deg)` }}>
-                  <BookSpine item={i} onOpen={setOpen} lying />
-                </div>
-              ))}
+          {!isEmpty && (
+            <div className="pointer-events-auto">
+              <div className="glass mb-1 inline-block rounded-full px-3 py-0.5 text-xs shadow">To-read pile · {pile.length}{pile.length > 6 ? " (it’s growing…)" : ""}</div>
+              <div className="flex max-h-[30vh] flex-col-reverse items-start overflow-y-auto overflow-x-hidden px-3 py-2">
+                {pile.map((i, idx) => (
+                  <div key={i.id} style={{ transform: `translateX(${((idx * 13) % 17) - 8}px) rotate(${((idx * 29) % 9) - 4}deg)` }}>
+                    <BookSpine item={i} onOpen={setOpen} lying />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           {!selectedItem && <CatCompanion {...petProps} />}
         </div>
       )}
