@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { itemDestination, orderedItems, shouldCelebrate } from "@/lib/library";
+import { itemDestination, nudge, orderedItems, shouldCelebrate } from "@/lib/library";
 import type { Item } from "@/lib/library";
 
 describe("Reader library rules", () => {
@@ -18,5 +18,10 @@ describe("Reader library rules", () => {
     expect(shouldCelebrate("reading", "read")).toBe(true);
     expect(shouldCelebrate("read", "read")).toBe(false);
     expect(shouldCelebrate("to_read", "reading")).toBe(false);
+  });
+  it("invites a brand-new reader to add a first book", () => {
+    const hint = nudge([]);
+    expect(hint.text).toContain("first book");
+    expect(hint.item).toBeUndefined();
   });
 });
