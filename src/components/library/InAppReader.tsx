@@ -7,7 +7,23 @@ import type { Item } from "@/lib/library";
 import { playPageTurn } from "@/lib/library";
 import { askCompanion } from "@/lib/companion.functions";
 
-type Stored = { type: "text"; text: string } | { type: "epub"; data: ArrayBuffer };
+type Stored = { type: "text"; text: string } | { type: "epub"; data: ArrayBuffer } | { type: "pdf"; pages: string[]; name: string };
+
+/** Pull the text of every PDF page so page numbers match the original copy. */
+export async function pdfPages(data: ArrayBuffer): Promise<string[]> {
+  const pdfjs = await import("pdfjs-dist");
+  const worker = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+  pdfjs.GlobalWorkerOptions.workerSrc = worker;
+  const doc = await pdfjs.getDocument({ data }).promise;
+  const out: string[] = [];
+  for (let n = 1; n <= doc.numPages; n++) {
+    const c = await (await doc.getPage(n)).getTextContent();
+    let t = "";
+    for (const it of c.items as { str?: string; hasEOL?: boolean }[]) t += (it.str ?? "") + (it.hasEOL ? "\n" : "");
+    out.push(t.trim());
+  }
+  return out;
+}
 
 // Copies stay on this device (IndexedDB), never uploaded.
 function db() {
@@ -48,18 +64,23 @@ export function InAppReader({ item, onHighlight }: { item: Item; onHighlight: (l
   async function save(v: Stored) { await putCopy(item.id, v); setCopy(v); }
   async function onFile(f: File) {
     if (/\.epub$/i.test(f.name)) save({ type: "epub", data: await f.arrayBuffer() });
+    else if (/\.pdf$/i.test(f.name) || f.type === "application/pdf") {
+      const id = toast.loading("Reading your PDF…");
+      try { const pages = await pdfPages(await f.arrayBuffer()); toast.dismiss(id); if (!pages.some(Boolean)) { toast.error("This PDF has no selectable text (it may be scanned)."); return; } save({ type: "pdf", pages, name: f.name }); }
+      catch { toast.dismiss(id); toast.error("Couldn't open that PDF."); }
+    }
     else if (/\.(txt|md)$/i.test(f.name) || f.type.startsWith("text/")) save({ type: "text", text: await f.text() });
-    else toast.error("Use an .epub or .txt file.");
+    else toast.error("Use a PDF, EPUB or text file.");
   }
 
   if (copy === undefined) return null;
   if (!copy) return (
     <div className="paper-sheet space-y-3 rounded-xl p-6">
       <h3 className="text-2xl font-semibold">Read it right here</h3>
-      <p className="font-sans text-sm text-muted-foreground">Add your own copy (EPUB or text), or paste an article. It stays on this device.</p>
+      <p className="font-sans text-sm text-muted-foreground">Upload your own copy (PDF, EPUB or text), or paste an article. It stays on this device.</p>
       <label className="block font-sans text-sm">
         <span className="sr-only">Book file</span>
-        <input type="file" accept=".epub,.txt,.md,text/plain" aria-label="Book file" onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} className="text-sm" />
+        <input type="file" accept=".pdf,application/pdf,.epub,.txt,.md,text/plain" aria-label="Book file" onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} className="text-sm" />
       </label>
       <Textarea value={paste} onChange={e => setPaste(e.target.value)} placeholder="…or paste the text of an article or chapter" className="min-h-28 bg-card" />
       <Button disabled={!paste.trim()} onClick={() => save({ type: "text", text: paste })}>Open on the desk</Button>
@@ -68,7 +89,7 @@ export function InAppReader({ item, onHighlight }: { item: Item; onHighlight: (l
 
   return (
     <div className="space-y-2">
-      {copy.type === "text" ? <TextBook item={item} text={copy.text} onHighlight={onHighlight} /> : <EpubBook item={item} data={copy.data} onHighlight={onHighlight} />}
+      {copy.type === "text" ? <TextBook item={item} text={copy.text} onHighlight={onHighlight} /> : copy.type === "pdf" ? <TextBook item={item} fixedPages={copy.pages} onHighlight={onHighlight} /> : <EpubBook item={item} data={copy.data} onHighlight={onHighlight} />}
       <button className="font-sans text-xs text-primary-foreground/70 hover:underline" onClick={async () => { await putCopy(item.id, null); setCopy(null); }}>Remove my copy</button>
     </div>
   );
@@ -112,15 +133,16 @@ function useSelectionTools(item: Item, onHighlight: (l: string) => Promise<void>
   return { setSel, bar, panel };
 }
 
-function TextBook({ item, text, onHighlight }: { item: Item; text: string; onHighlight: (l: string) => Promise<void> }) {
-  const pages = useMemo(() => paginate(text), [text]);
+function TextBook({ item, text = "", fixedPages, onHighlight }: { item: Item; text?: string; fixedPages?: string[]; onHighlight: (l: string) => Promise<void> }) {
+  const pages = useMemo(() => fixedPages ? fixedPages.map(pg => pg.split(/\n{2,}|\n/).map(x => x.trim()).filter(Boolean)) : paginate(text), [text, fixedPages]);
+  const news = item.kind === "newsletter" || item.kind === "clipping";
   const key = `bookscape-page-${item.id}`;
   const [p, setP] = useState(0);
   const [flip, setFlip] = useState(0);
   const tools = useSelectionTools(item, onHighlight);
   useEffect(() => { setP(Number(localStorage.getItem(key)) || 0); }, [key]);
   function go(n: number) {
-    const next = Math.max(0, Math.min(pages.length - 1 - ((pages.length - 1) % 2), n));
+    const next = Math.max(0, Math.min(pages.length - 1, n));
     if (next === p) return;
     playPageTurn(); setFlip(f => f + 1); setP(next); localStorage.setItem(key, String(next));
   }
@@ -145,9 +167,13 @@ function TextBook({ item, text, onHighlight }: { item: Item; text: string; onHig
     <div className="space-y-3">
       <div key={flip} ref={pageRef} onMouseUp={capture} onTouchEnd={capture}
         className="page-flip grid overflow-hidden rounded-xl shadow-2xl sm:grid-cols-2" style={{ borderLeft: `14px solid var(--book-${item.color})` }}>
+        {news && <div className="newsprint col-span-full border-b-4 border-double border-current px-6 pt-4 pb-2 text-center">
+          <div className="text-[10px] uppercase tracking-[0.3em]">{item.author || "The Morning Edition"} · Page {p + 1}</div>
+          <div className="text-3xl font-black uppercase leading-tight sm:text-4xl">{item.title}</div>
+        </div>}
         {[p, p + 1].map(i => (
-          <div key={i} className="paper-sheet min-h-96 border-l p-6 font-display text-[17px] leading-relaxed sm:p-8">
-            {pages[i]?.map((para, j) => <p key={j} className="mb-3">{para}</p>)}
+          <div key={i} className={news ? "newsprint min-h-96 border-l p-5 text-[15px] leading-snug [column-gap:1.25rem] [column-rule:1px_solid_currentColor] columns-2 text-justify" : "paper-sheet min-h-96 border-l p-6 font-display text-[17px] leading-relaxed sm:p-8"}>
+            {pages[i]?.map((para, j) => <p key={j} className={news && j === 0 && i === p ? "mb-3 first-letter:float-left first-letter:mr-1 first-letter:text-4xl first-letter:font-black" : "mb-3"}>{para}</p>)}
             <p className="mt-4 text-center font-sans text-xs text-muted-foreground">{pages[i] ? i + 1 : ""}</p>
           </div>
         ))}
