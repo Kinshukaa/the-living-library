@@ -8,6 +8,7 @@ export function BookSpine({ item, onOpen, lying = false }: { item: Item; onOpen:
   const h = spineHeight(item.kind, item.title);
   const worn = wear(item.open_count);
   const isPaper = item.kind !== "book";
+  if (item.kind === "newsletter" || item.kind === "clipping") return <Broadsheet item={item} onOpen={onOpen} lying={lying} worn={worn} h={h} />;
 
   const style: React.CSSProperties = lying
     ? { width: h, height: Math.max(10, Math.round(w * 0.7)), backgroundColor: `var(--book-${item.color})` }
