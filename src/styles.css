@@ -232,3 +232,23 @@
 }
 @keyframes flicker { 0% { transform: scale(1) rotate(-2deg); opacity: .95 } 50% { transform: scale(1.08,.94) rotate(2deg) } 100% { transform: scale(.95,1.06) rotate(-1deg); opacity: .85 } }
 @media (prefers-reduced-motion: reduce) { .candle-flame { animation: none } }
+
+/* ---------- broadsheet newsletters & clippings ---------- */
+@utility broadsheet {
+  position: relative;
+  color: var(--paper-ink);
+  background:
+    radial-gradient(oklch(0.45 0.05 70 / 0.10) 1px, transparent 1px) 0 0 / 5px 5px,
+    radial-gradient(ellipse at 30% 80%, oklch(0.6 0.08 70 / 0.22), transparent 60%),
+    linear-gradient(90deg, oklch(0.84 0.04 85), oklch(0.93 0.03 88) 45%, oklch(0.86 0.04 82));
+  border-radius: 2px;
+  box-shadow: var(--shadow-book), inset -3px 0 0 oklch(0 0 0 / 0.08);
+  font-family: var(--font-news, Georgia, serif);
+}
+@utility broadsheet-cols {
+  background: repeating-linear-gradient(180deg, oklch(0.3 0.02 60 / 0.35) 0 1px, transparent 1px 4px);
+}
+@utility twine {
+  background: repeating-linear-gradient(45deg, oklch(0.62 0.07 70) 0 2px, oklch(0.5 0.06 60) 2px 4px);
+  box-shadow: 0 1px 1px oklch(0 0 0 / 0.3);
+}

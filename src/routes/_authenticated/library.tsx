@@ -12,6 +12,8 @@ import { ReadingDesk } from "@/components/library/ReadingDesk";
 import { AddItemDialog } from "@/components/library/AddItemDialog";
 import { ManageShelves } from "@/components/library/ManageShelves";
 import { CatCompanion } from "@/components/library/CatCompanion";
+import { MusicPlayer } from "@/components/library/MusicPlayer";
+import { WelcomeTour, tourKey } from "@/components/library/WelcomeTour";
 import { defaultPetName, petSound, type PetType } from "@/lib/pet";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Item, TimeOfDay } from "@/lib/library";
@@ -52,6 +54,8 @@ function Library() {
   const [catWiggle, setCatWiggle] = useState(0);
   const [arranging, setArranging] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [tour, setTour] = useState(false);
+  useEffect(() => { if (!localStorage.getItem(tourKey(user.id))) setTour(true); }, [user.id]);
 
   useEffect(() => {
     setTod(timeOfDay());
@@ -194,6 +198,8 @@ function Library() {
               <Button variant="secondary" onClick={surprise}>✨ Surprise me</Button>
               {!profile.isLoading && <AddItemDialog userId={user.id} genres={genres} key={genres.join("|")} />}
               {!profile.isLoading && <ManageShelves userId={user.id} genres={genres} items={all} />}
+              <MusicPlayer />
+              <Button variant="ghost" onClick={() => setTour(true)}>Take the tour</Button>
               <Button variant="ghost" onClick={toggleMute} aria-label="Toggle sound">{muted ? "🔇" : "🔊"}</Button>
               <Button variant="ghost" onClick={signOut}>Sign out</Button>
             </div>
@@ -311,6 +317,7 @@ function Library() {
         </div>
       )}
 
+      <WelcomeTour userId={user.id} open={tour} onOpenChange={setTour} />
       {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion {...petProps} desk />} />}
     </div>
   );
