@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,13 @@ import { COLORS, GENRES, KINDS, STATUSES, itemDestination, shouldCelebrate } fro
 import type { Item } from "@/lib/library";
 import { cn } from "@/lib/utils";
 
+const BOOK_EMOJIS = ["📚", "📖", "✨", "❤️", "☕", "🌿", "💡", "🔖"] as const;
+type EmojiField = "title" | "author" | "description";
+
+export function insertEmoji(value: string, emoji: string, start = value.length, end = start) {
+  return `${value.slice(0, start)}${emoji}${value.slice(end)}`;
+}
+
 export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, trigger }: { userId: string; genres?: string[]; item?: Item; onComplete?: () => void; trigger?: React.ReactNode }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -20,7 +27,22 @@ export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, 
     placement: item?.placement ?? "shelf", status: item?.status ?? "to_read",
   });
   const [busy, setBusy] = useState(false);
+  const [emojiField, setEmojiField] = useState<EmojiField>("title");
+  const titleRef = useRef<HTMLInputElement>(null);
+  const authorRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const set = (k: keyof typeof f, v: string | number) => setF((p) => ({ ...p, [k]: v }));
+
+  function addEmoji(emoji: string) {
+    const ref = emojiField === "title" ? titleRef : emojiField === "author" ? authorRef : descriptionRef;
+    const input = ref.current;
+    const value = f[emojiField];
+    const start = input?.selectionStart ?? value.length;
+    const end = input?.selectionEnd ?? start;
+    set(emojiField, insertEmoji(value, emoji, start, end));
+    input?.focus({ preventScroll: true });
+    input?.setSelectionRange(start + emoji.length, start + emoji.length);
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -44,10 +66,20 @@ export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, 
       <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg">
         <DialogHeader><DialogTitle>{item ? "Edit your book" : "Add to your library"}</DialogTitle></DialogHeader>
         <form onSubmit={save} className="space-y-3">
-          <Input placeholder="Title" value={f.title} onChange={(e) => set("title", e.target.value)} required />
-          <Input placeholder="Author or source" value={f.author} onChange={(e) => set("author", e.target.value)} />
+          <Input ref={titleRef} placeholder="Title" value={f.title} onFocus={() => setEmojiField("title")} onChange={(e) => set("title", e.target.value)} required />
+          <Input ref={authorRef} placeholder="Author or source" value={f.author} onFocus={() => setEmojiField("author")} onChange={(e) => set("author", e.target.value)} />
           <Input type="url" placeholder="Link (https://…)" value={f.url} onChange={(e) => set("url", e.target.value)} />
-          <Textarea placeholder="Why you saved it" value={f.description} onChange={(e) => set("description", e.target.value)} />
+          <Textarea ref={descriptionRef} placeholder="Why you saved it" value={f.description} onFocus={() => setEmojiField("description")} onChange={(e) => set("description", e.target.value)} />
+          <div className="rounded-lg bg-muted/60 p-3">
+            <p className="mb-2 text-sm">Add an emoji <span className="text-muted-foreground">to your {emojiField === "description" ? "note" : emojiField}</span></p>
+            <div className="flex flex-wrap gap-1" aria-label="Book emoji choices">
+              {BOOK_EMOJIS.map((emoji) => (
+                <Button key={emoji} type="button" variant="ghost" size="sm" className="h-9 w-9 p-0 text-xl"
+                  aria-label={`Insert ${emoji} emoji`} title={`Add to ${emojiField}`}
+                  onMouseDown={(e) => e.preventDefault()} onClick={() => addEmoji(emoji)}>{emoji}</Button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Select value={f.kind} onValueChange={(v) => set("kind", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
