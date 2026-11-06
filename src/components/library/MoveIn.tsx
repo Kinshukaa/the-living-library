@@ -59,11 +59,11 @@ export function MoveIn({ userId, genres, open, onDone }: { userId: string; genre
   async function finish() {
     setBusy(true);
     const picks = [...AUTHORS.filter(a => authors.includes(a.name)), ...READS.filter(r => reads.includes(r.title))];
-    const shelf = (g: string) => (genres.includes(g) ? g : genres[0]);
+    const shelf = (g: string): string => (genres.includes(g) ? g : genres[0] ?? g);
     if (picks.length) {
       const { error } = await supabase.from("items").insert(picks.map((p, i) => ({
         user_id: userId, title: p.title, author: p.author, genre: shelf(p.genre), kind: p.kind ?? "book",
-        placement: "shelf", status: "to_read", color: COLORS[i % COLORS.length], sort_order: i,
+        placement: "shelf", status: "to_read", color: COLORS[i % COLORS.length] ?? "rose", sort_order: i,
       })));
       if (error) { toast.error(error.message); setBusy(false); return; }
     }
