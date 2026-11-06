@@ -20,6 +20,7 @@ export type Database = {
           color: string
           created_at: string
           description: string | null
+          dog_ear_removed: boolean
           genre: string
           id: string
           kind: string
@@ -38,6 +39,7 @@ export type Database = {
           color?: string
           created_at?: string
           description?: string | null
+          dog_ear_removed?: boolean
           genre?: string
           id?: string
           kind?: string
@@ -56,6 +58,7 @@ export type Database = {
           color?: string
           created_at?: string
           description?: string | null
+          dog_ear_removed?: boolean
           genre?: string
           id?: string
           kind?: string
@@ -114,6 +117,7 @@ export type Database = {
           genres: string[]
           id: string
           library_name: string
+          onboarded: boolean
           pet_last_fed_at: string | null
           pet_type: string
         }
@@ -124,6 +128,7 @@ export type Database = {
           genres?: string[]
           id: string
           library_name?: string
+          onboarded?: boolean
           pet_last_fed_at?: string | null
           pet_type?: string
         }
@@ -134,6 +139,7 @@ export type Database = {
           genres?: string[]
           id?: string
           library_name?: string
+          onboarded?: boolean
           pet_last_fed_at?: string | null
           pet_type?: string
         }

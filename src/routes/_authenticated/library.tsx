@@ -12,6 +12,7 @@ import { ReadingDesk } from "@/components/library/ReadingDesk";
 import { AddItemDialog } from "@/components/library/AddItemDialog";
 import { ManageShelves } from "@/components/library/ManageShelves";
 import { CatCompanion } from "@/components/library/CatCompanion";
+import { MoveIn } from "@/components/library/MoveIn";
 import { MusicPlayer } from "@/components/library/MusicPlayer";
 import { WelcomeTour, tourKey } from "@/components/library/WelcomeTour";
 import { defaultPetName, petSound, type PetType } from "@/lib/pet";
@@ -55,6 +56,7 @@ function Library() {
   const [arranging, setArranging] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [tour, setTour] = useState(false);
+  const [movedIn, setMovedIn] = useState(false);
   useEffect(() => { if (!localStorage.getItem(tourKey(user.id))) setTour(true); }, [user.id]);
 
   useEffect(() => {
@@ -100,6 +102,7 @@ function Library() {
   const shelved = filtered.filter((i) => i.placement !== "pile");
   const isEmpty = !items.isLoading && all.length === 0;
   const byGenre = genres.filter(g => (room_ === "all" || room_ === g) && (genre === "all" || genre === g)).map((g) => ({ g, list: shelved.filter((i) => i.genre === g) }));
+  const needsMoveIn = !movedIn && isEmpty && !profile.isLoading && !profile.data?.onboarded;
   const hint = nudge(all);
   const highlights = useQuery({
     queryKey: ["highlights"],
@@ -317,7 +320,8 @@ function Library() {
         </div>
       )}
 
-      <WelcomeTour userId={user.id} open={tour} onOpenChange={setTour} />
+      <MoveIn userId={user.id} genres={genres} open={needsMoveIn} onDone={() => setMovedIn(true)} />
+      <WelcomeTour userId={user.id} open={tour && !needsMoveIn} onOpenChange={setTour} />
       {selectedItem && <ReadingDesk item={selectedItem} userId={user.id} genres={genres} onComplete={celebrate} onClose={() => setOpen(null)} cat={<CatCompanion {...petProps} desk />} />}
     </div>
   );
