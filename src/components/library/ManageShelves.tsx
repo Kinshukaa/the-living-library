@@ -44,10 +44,10 @@ export function ManageShelves({ userId, genres, items }: { userId: string; genre
     finally { setBusy(false); }
   }
   return <Dialog>
-    <DialogTrigger asChild><Button variant="secondary">Manage genres</Button></DialogTrigger>
+    <DialogTrigger asChild><Button variant="secondary">Add / remove shelves</Button></DialogTrigger>
     <DialogContent className="max-h-[85vh] overflow-y-auto">
-      <DialogHeader><DialogTitle>Your genres</DialogTitle></DialogHeader>
-      <form onSubmit={add} className="flex gap-2"><Input aria-label="New genre" placeholder="New genre" value={name} onChange={e => setName(e.target.value)} /><Button type="submit" size="icon" aria-label="Add genre" disabled={busy || !name.trim()}><Plus /></Button></form>
+      <DialogHeader><DialogTitle>Your shelves</DialogTitle></DialogHeader>
+      <form onSubmit={add} className="flex gap-2"><Input aria-label="New genre" placeholder="New shelf name (e.g. Poetry)" value={name} onChange={e => setName(e.target.value)} /><Button type="submit" size="icon" aria-label="Add genre" disabled={busy || !name.trim()}><Plus /></Button></form>
       <label className="text-sm">Move books from a removed genre to
         <Select value={target} onValueChange={setTarget}><SelectTrigger aria-label="Move removed genre books to"><SelectValue placeholder="Choose a genre" /></SelectTrigger><SelectContent>{genres.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent></Select>
       </label>

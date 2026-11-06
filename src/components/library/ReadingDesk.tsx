@@ -118,6 +118,10 @@ export function ReadingDesk({ item, userId, onClose, genres, onComplete, cat }: 
               const { error } = await supabase.from("items").update({ placement: item.placement === "pile" ? "shelf" : "pile" }).eq("id", item.id);
               if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["items"] });
             }}>{item.placement === "pile" ? "Return to shelf" : "Move to to-read pile"}</Button>
+            <Button variant="secondary" className="w-full" onClick={async () => {
+              const { error } = await supabase.from("items").update({ dog_ear_removed: !item.dog_ear_removed }).eq("id", item.id);
+              if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["items"] });
+            }}>{item.dog_ear_removed ? "📄 Bring back the dog-ear" : "✨ Smooth out the dog-ear"}</Button>
             <form onSubmit={addNote} className="paper-sheet space-y-2 rounded-lg p-3">
               <div className="flex gap-1">
                 {(["highlight", "note"] as const).map((k) => (

@@ -22,7 +22,7 @@ export function BookSpine({ item, onOpen, lying = false }: { item: Item; onOpen:
       title={`${item.title}${item.author ? " — " + item.author : ""}${item.open_count ? ` · opened ${item.open_count}×` : " · never opened"}`}
       className={cn(
         "book-spine shrink-0 overflow-hidden p-0 whitespace-normal text-primary-foreground",
-        worn >= 0.35 && "dog-ear",
+        worn >= 0.35 && !item.dog_ear_removed && "dog-ear",
         item.open_count === 0 && "pristine",
         isPaper && "rounded-sm",
         lying && "hover:!-translate-y-1 hover:![transform:translateY(-4px)]",
