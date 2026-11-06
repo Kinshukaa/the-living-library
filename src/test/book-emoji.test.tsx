@@ -9,7 +9,7 @@ afterEach(cleanup);
 describe("book emojis", () => {
   it("inserts an emoji at the cursor without removing surrounding text", () => {
     expect(insertEmoji("Atomic Habits", "📚", 6, 6)).toBe("Atomic📚 Habits");
-    expect(insertEmoji("A note", "✨", 1, 5)).toBe("A✨");
+    expect(insertEmoji("A note", "✨", 1, 5)).toBe("A✨e");
   });
 
   it("adds the chosen emoji to the focused book field", () => {
