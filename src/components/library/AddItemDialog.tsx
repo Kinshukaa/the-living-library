@@ -11,6 +11,13 @@ import { COLORS, GENRES, KINDS, STATUSES, itemDestination, shouldCelebrate } fro
 import type { Item } from "@/lib/library";
 import { cn } from "@/lib/utils";
 
+const BOOK_EMOJIS = ["📚", "📖", "✨", "❤️", "☕", "🌿", "💡", "🔖"] as const;
+type EmojiField = "title" | "author" | "description";
+
+export function insertEmoji(value: string, emoji: string, start = value.length, end = start) {
+  return `${value.slice(0, start)}${emoji}${value.slice(end)}`;
+}
+
 export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, trigger }: { userId: string; genres?: string[]; item?: Item; onComplete?: () => void; trigger?: React.ReactNode }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
