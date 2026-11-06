@@ -27,5 +27,13 @@ describe("book emojis", () => {
     fireEvent.click(screen.getByRole("button", { name: "Insert 📚 emoji" }));
 
     expect(title).toHaveValue("Atomic Habits📚");
+
+    const note = screen.getByPlaceholderText("Why you saved it");
+    fireEvent.change(note, { target: { value: "A cosy note" } });
+    fireEvent.focus(note);
+    fireEvent.click(screen.getByRole("button", { name: "Insert ❤️ emoji" }));
+
+    expect(note).toHaveValue("A cosy note❤️");
+    expect(title).toHaveValue("Atomic Habits📚");
   });
 });

@@ -40,10 +40,8 @@ export function AddItemDialog({ userId, genres = [...GENRES], item, onComplete, 
     const start = input?.selectionStart ?? value.length;
     const end = input?.selectionEnd ?? start;
     set(emojiField, insertEmoji(value, emoji, start, end));
-    requestAnimationFrame(() => {
-      input?.focus();
-      input?.setSelectionRange(start + emoji.length, start + emoji.length);
-    });
+    input?.focus({ preventScroll: true });
+    input?.setSelectionRange(start + emoji.length, start + emoji.length);
   }
 
   async function save(e: React.FormEvent) {
